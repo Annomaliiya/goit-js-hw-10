@@ -1,3 +1,5 @@
 import './css/styles.css';
+import './js/fetchCountries';
+import './js/country';
 
-const DEBOUNCE_DELAY = 300;
+export const DEBOUNCE_DELAY = 3000;
