@@ -2,7 +2,7 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchCountries } from './fetchCountries';
 import { DEBOUNCE_DELAY } from '../index.js';
-import debounce from 'lodash.debounce';
+import { debounce } from 'lodash';
 import countryCardTemplate from '../templates/country-card.hbs';
 import countryListTemplate from '../templates/country-list-item.hbs';
 
@@ -16,28 +16,29 @@ const renderCountryList = countryData => {
     countryCardsWrapperEl.innerHTML = countryListTemplate(countryData);
 };
 
-const onInput = (event) => {
-    const country = document.querySelector('#search-box').value.trim();
+function onInput(event) {
+    const country = event.target.value.trim();
     if (country) {
         fetchCountries(country)
-            .then(countryData => {
-                if (countryData.length > 10) {
-                    Notify.info("Too many matches found. Please enter a more specific name.");
-                }
-                else if (countryData.length >= 2) {
-                    renderCountryList(countryData);
-                } else {
-                    renderCountryCard(countryData);
-                }
-            })
-            .catch(error => {
+            .then(selectRender)
+            .catch(() => {
                 Notify.failure("Oops, there is no country with that name");
-            })
+                countryCardsWrapperEl.innerHTML = "";
+            });
     }
     else {
         countryCardsWrapperEl.innerHTML = "";
     }
 };
-const doYourThingDebounced = debounce(onInput, DEBOUNCE_DELAY);
-inputValue.addEventListener('input', doYourThingDebounced);
+function selectRender(countryData) {
+    if (countryData.length > 10) {
+        Notify.info("Too many matches found. Please enter a more specific name.");
+    }
+    else if (countryData.length >= 2) {
+        renderCountryList(countryData);
+    } else {
+        renderCountryCard(countryData);
+    }
+}
+inputValue.addEventListener('input', debounce(onInput, DEBOUNCE_DELAY));
 
